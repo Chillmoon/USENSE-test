@@ -1,25 +1,49 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react";
+import { CircularProgress, Box } from "@mui/material";
 
-function App() {
+import Converter from "./Components/Converter";
+import Header from "./Components/Header";
+
+import styles from "./styles";
+
+const App = () => {
+  const [rates, setRates] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRates = async () => {
+      const apiKey = "880a4e31aeac579a1f367aff";
+      try {
+        const response = await fetch(
+          `https://v6.exchangerate-api.com/v6/${apiKey}/latest/UAH`
+        );
+        const data = await response.json();
+
+        setRates(data.conversion_rates);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching exchange rates:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchRates();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box sx={styles.loaderBox}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Header rates={rates} />
+      <Converter rates={rates} />
+    </>
   );
-}
+};
 
 export default App;
